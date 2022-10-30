@@ -1,6 +1,9 @@
 package repository
 
-import "context"
+import (
+	"context"
+	"github.com/jbresky/grpc/models"
+)
 
 type Repository interface {
 	GetStudent(ctx context.Context, id string) (*models.Student, error)

@@ -6,6 +6,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+	"github.com/jbresky/grpc/models"
 )
 
 type PostgresRepository struct {
@@ -17,6 +18,7 @@ func NewPostgresRepository(url string) (*PostgresRepository, error) {
 	if err != nil {
 		return nil, err
 	}
+	return &PostgresRepository{db}, nil
 }
 
 func (repo *PostgresRepository) SetStudent(ctx context.Context, student *models.Student) error {
@@ -37,11 +39,12 @@ func (repo *PostgresRepository) GetStudent(ctx context.Context, id string) (*mod
 	}()
 	var student = models.Student{}
 	for rows.Next() {
-		err := rows.Scan(&student.Id, &student.Name, &student.Age)
-		if err != nil {
-			return nil, err
+		if err = rows.Scan(&student.Id, &student.Name, &student.Age); err == nil {
+			return &student, nil
 		}
-		return &student, nil
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 	return &student, nil
 }
